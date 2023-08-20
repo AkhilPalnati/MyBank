@@ -2,6 +2,7 @@ package com.banking.java.service.impl;
 
 import com.banking.java.dto.AccountInfo;
 import com.banking.java.dto.BankResponse;
+import com.banking.java.dto.TransactionUpdate;
 import com.banking.java.dto.UserRequest;
 import com.banking.java.entity.User;
 import com.banking.java.repository.UserRepository;
@@ -76,4 +77,47 @@ public class UserServiceImpl implements UserService{
                 .accountInfo(accountInfo)
                 .build();
     }
-}
+
+    // UserServiceImpl.java
+
+        @Override
+        public BankResponse updateTransaction(String accountNumber, TransactionUpdate transactionUpdate) {
+            User user = userRepository.findByAccountNumber(accountNumber);
+            if (user == null) {
+                // Handle account not found...
+            }
+
+            BigDecimal transactionAmount = transactionUpdate.getAmount();
+            BigDecimal currentBalance = user.getAccountBalance();
+
+            if ("deposit".equals(transactionUpdate.getTransactionType())) {
+                currentBalance = currentBalance.add(transactionAmount);
+            } else if ("withdrawal".equals(transactionUpdate.getTransactionType())) {
+                if (currentBalance.compareTo(transactionAmount) >= 0) {
+                    currentBalance = currentBalance.subtract(transactionAmount);
+                } else {
+                    // Handle insufficient balance...
+                }
+            } else {
+                // Handle invalid transaction type...
+            }
+
+            user.setAccountBalance(currentBalance);
+
+            // Create and store a new transaction record (if needed)...
+
+            userRepository.save(user);
+
+            return BankResponse.builder()
+                    .responseCode("200")
+                    .responseMessage("Transaction updated successfully")
+                    .accountInfo(AccountInfo.builder()
+                            .accountBalance(currentBalance)
+                            .accountNumber(user.getAccountNumber())
+                            .accountName(user.getFirstName() + " " + user.getLastName())
+                            .build())
+                    .build();
+        }
+
+        // ...
+    }

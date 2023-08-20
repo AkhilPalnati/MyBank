@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List; // Import the correct List interface
 
 @Getter
 @Setter
@@ -32,4 +33,8 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
 
+    // ...
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> userTransactions = new ArrayList<>(); // Renamed field
 }
